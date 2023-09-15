@@ -2,6 +2,7 @@ package bot
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/hiteshjain48/animephile-discord-bot/config"
 	"github.com/bwmarrin/discordgo"
@@ -44,7 +45,16 @@ func messageHandler(session *discordgo.Session, msg *discordgo.MessageCreate) {
 		return
 	}
 	fmt.Println(msg.Author.ID)
-	if msg.Content == "subscribe" {
-		_, _ = session.ChannelMessageSend(msg.ChannelID, "done!")
+	message := string(msg.Content)
+	messageSplit := strings.Split(message, " ")
+	fmt.Println(string(messageSplit[0]))
+	var anime []string
+	if messageSplit[0] == "subscribe" {
+		for i := 1; i < len(messageSplit); i++ {
+			anime = append(anime, messageSplit[i])
+		}
+		_, _ = session.ChannelMessageSend(msg.ChannelID, fmt.Sprintf("subscribed to %v", anime))
 	}
+	fmt.Println(anime)
+	fmt.Println(len(anime))
 }
