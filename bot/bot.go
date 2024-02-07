@@ -47,10 +47,11 @@ func messageHandler(session *discordgo.Session, msg *discordgo.MessageCreate) {
 	fmt.Println(msg.Author.ID)
 	message := string(msg.Content)
 	messageSplit := strings.Split(message, " ")
+	fmt.Println(message)
 	fmt.Println(string(messageSplit[0]))
 	var anime []string
-	if messageSplit[0] == "subscribe" {
-		for i := 1; i < len(messageSplit); i++ {
+	if messageSplit[1] == "subscribe" {
+		for i := 2; i < len(messageSplit); i++ {
 			anime = append(anime, messageSplit[i])
 		}
 		_, _ = session.ChannelMessageSend(msg.ChannelID, fmt.Sprintf("subscribed to %v", anime))
