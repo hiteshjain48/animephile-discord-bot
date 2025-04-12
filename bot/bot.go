@@ -6,23 +6,28 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/hiteshjain48/animephile-discord-bot/config"
+	"github.com/hiteshjain48/animephile-discord-bot/logger"
 )
 
 var BotID string
 var goBot *discordgo.Session
 
 func Start() {
+	logger.Init()
 	var err error
 	goBot, err = discordgo.New("Bot " + config.Token)
 	if err != nil {
-		fmt.Println(err.Error())
+		// fmt.Println(err.Error())
+		logger.Log.Error(err.Error())
 		return
 	}
 
 	user, err := goBot.User("@me")
-	fmt.Println(user)
+	// fmt.Println(user)
+	logger.Log.Info(fmt.Sprintf("User: %s", user))
 	if err != nil {
-		fmt.Println(err.Error())
+		// fmt.Println(err.Error())
+		logger.Log.Error(err.Error())
 		return
 	}
 
@@ -32,11 +37,13 @@ func Start() {
 
 	err = goBot.Open()
 	if err != nil {
-		fmt.Println(err.Error())
+		// fmt.Println(err.Error())
+		logger.Log.Error(err.Error())
 		return
 	}
 
-	fmt.Println("Bot is running!")
+	// fmt.Println("Bot is running!")
+	logger.Log.Info("Bot is running!")
 }
 
 func messageHandler(session *discordgo.Session, msg *discordgo.MessageCreate) {
@@ -44,8 +51,10 @@ func messageHandler(session *discordgo.Session, msg *discordgo.MessageCreate) {
 	if msg.Author.ID == BotID {
 		return
 	}
-	fmt.Println(msg.Author.ID)
-	fmt.Println(msg.Content)
+	// fmt.Println(msg.Author.ID)
+	// fmt.Println(msg.Content)
+	logger.Log.Info(fmt.Sprintf("Author: %s", msg.Author))
+	logger.Log.Info(fmt.Sprintf("Message received: ", msg.Content))
 	if !strings.HasPrefix(msg.Content, config.BotPrefix) {
 		return
 	}
@@ -59,7 +68,6 @@ func messageHandler(session *discordgo.Session, msg *discordgo.MessageCreate) {
 	// message := strings.TrimPrefix(strings.Join(msgSplit, " "), config.BotPrefix)
 	// fmt.Println(message)
 	// args := strings.Fields(message)
-
 
 	//if direcct msg to bot then this
 	message := strings.TrimPrefix(msg.Content, config.BotPrefix)

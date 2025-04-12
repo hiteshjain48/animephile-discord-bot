@@ -15,12 +15,18 @@ github.com/joho/godotenv
 github.com/lib/pq
 github.com/lib/pq/oid
 github.com/lib/pq/scram
+# github.com/sirupsen/logrus v1.9.3
+## explicit; go 1.13
+github.com/sirupsen/logrus
 # golang.org/x/crypto v0.0.0-20210421170649-83a5a9bb288b
 ## explicit; go 1.11
 golang.org/x/crypto/internal/subtle
 golang.org/x/crypto/nacl/secretbox
 golang.org/x/crypto/poly1305
 golang.org/x/crypto/salsa20/salsa
-# golang.org/x/sys v0.0.0-20201119102817-f84b799fce68
-## explicit; go 1.12
+# golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8
+## explicit; go 1.17
 golang.org/x/sys/cpu
+golang.org/x/sys/internal/unsafeheader
+golang.org/x/sys/unix
+golang.org/x/sys/windows
