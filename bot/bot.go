@@ -54,7 +54,7 @@ func messageHandler(session *discordgo.Session, msg *discordgo.MessageCreate) {
 	// fmt.Println(msg.Author.ID)
 	// fmt.Println(msg.Content)
 	logger.Log.Info(fmt.Sprintf("Author: %s", msg.Author))
-	logger.Log.Info(fmt.Sprintf("Message received: ", msg.Content))
+	logger.Log.Info(fmt.Sprintf("Message received: %s", msg.Content))
 	if !strings.HasPrefix(msg.Content, config.BotPrefix) {
 		return
 	}
