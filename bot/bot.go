@@ -3,10 +3,13 @@ package bot
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/hiteshjain48/animephile-discord-bot/config"
 	"github.com/hiteshjain48/animephile-discord-bot/logger"
+	"github.com/hiteshjain48/animephile-discord-bot/anime"
+
 )
 
 var BotID string
@@ -41,7 +44,16 @@ func Start() {
 		logger.Log.Error(err.Error())
 		return
 	}
-
+	schedules, err := anime.GetSchedule()
+	if err != nil {
+		logger.Log.Error(err)
+	}
+	for _, s := range schedules {
+		fmt.Printf("📺 %s - Ep %d at %s\n",
+			s.Media.Title.Romaji,
+			s.Episode,
+			time.Unix(s.AiringAt, 0).Format("15:04 MST"))
+	}
 	// fmt.Println("Bot is running!")
 	logger.Log.Info("Bot is running!")
 }
