@@ -24,6 +24,7 @@ func main() {
 		SSLMode:  config.DBSSLMode,
 		DBUrl: 	  config.DBUrl,	
 	}
+	logger.Log.Info(dbConfig.DBUrl)
 	db, err := database.Connect(dbConfig)
 	if err != nil {
 		logger.Log.Error(err)
