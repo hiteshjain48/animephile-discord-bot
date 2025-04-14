@@ -43,6 +43,10 @@ func ReadConfig() error {
 	if BotPrefix == "" {
 		return errors.New("no bot prefix")
 	}
+
+	if DBUrl == "" {
+		DBUrl = "postgresql://postgres:HesAyEydKMQJdRvDGnVBEZZinGicaRdx@postgres.railway.internal:5432/railway?sslmode=disable"
+	}
 	// if err != nil {
 	// 	return err
 	// }
