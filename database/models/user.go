@@ -1,10 +1,12 @@
 package models
 
-import(
-	"github.com/google/uuid"
+import (
+	"time"
 )
 
 type User struct {
-	ID uuid.UUID
-	Name string
+	DiscordID 	string
+	UserName 	string
+	JoinedAt 	time.Time
 }
+

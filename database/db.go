@@ -5,6 +5,8 @@ import (
 	"fmt"
 
 	_ "github.com/lib/pq"
+	"github.com/pressly/goose/v3"
+	"github.com/hiteshjain48/animephile-discord-bot/logger"
 )
 
 type DBConfig struct {
@@ -33,4 +35,18 @@ func Connect(config DBConfig) (*sql.DB, error) {
 	}
 
 	return db, nil
+}
+
+func RunMigrations(db *sql.DB, migrationPath string) error {
+	goose.SetBaseFS(nil)
+	if err := goose.SetDialect("postgres"); err != nil {
+		return err
+	}
+
+	if err := goose.Up(db, migrationPath); err != nil {
+		return err
+	}
+
+	logger.Log.Info("Migrations successfully applied")
+	return nil
 }
