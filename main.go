@@ -22,6 +22,7 @@ func main() {
 		Password: config.DBPass,
 		DBName:   config.DBName,
 		SSLMode:  config.DBSSLMode,
+		DBUrl: 	  config.DBUrl,	
 	}
 	db, err := database.Connect(dbConfig)
 	if err != nil {

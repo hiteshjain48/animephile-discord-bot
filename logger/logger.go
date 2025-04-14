@@ -24,6 +24,6 @@ func Init() {
 	Log.SetFormatter(&logrus.TextFormatter{
 		FullTimestamp: true,
 	})
-
+	Log.SetReportCaller(true)
 	Log.SetLevel(logrus.InfoLevel)
 }

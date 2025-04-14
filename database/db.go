@@ -2,7 +2,6 @@ package database
 
 import (
 	"database/sql"
-	"fmt"
 
 	_ "github.com/lib/pq"
 	"github.com/pressly/goose/v3"
@@ -16,14 +15,15 @@ type DBConfig struct {
 	Password string
 	DBName   string
 	SSLMode  string
+	DBUrl	 string
 }
 
 func Connect(config DBConfig) (*sql.DB, error) {
-	connStr := fmt.Sprintf(
-		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
-		config.Host, config.Port, config.User, config.Password, config.DBName, config.SSLMode,
-	)
-
+	// connStr := fmt.Sprintf(
+	// 	"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
+	// 	config.Host, config.Port, config.User, config.Password, config.DBName, config.SSLMode,
+	// )
+	connStr := config.DBUrl
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		return nil, err

@@ -18,6 +18,7 @@ var (
 	DBPass    string
 	DBName    string
 	DBSSLMode string
+	DBUrl     string
 )
 
 func ReadConfig() error {
@@ -35,6 +36,7 @@ func ReadConfig() error {
 	DBUser = os.Getenv("DB_USER")
 	DBPass = os.Getenv("DB_PASS")
 	DBSSLMode = os.Getenv("DB_SSL_MODE")
+	DBUrl = os.Getenv("DB_URL")
 	if Token == "" {
 		return errors.New("no token found")
 	}
