@@ -28,6 +28,9 @@ func ReadConfig() error {
 	BotPrefix = os.Getenv("BOT_PREFIX")
 	DBHost = os.Getenv("DB_HOST")
 	DBPort, err = strconv.Atoi(os.Getenv("DB_PORT"))
+	if err != nil {
+		DBPort = 5432
+	}
 	DBName = os.Getenv("DB_NAME")
 	DBUser = os.Getenv("DB_USER")
 	DBPass = os.Getenv("DB_PASS")
@@ -38,8 +41,8 @@ func ReadConfig() error {
 	if BotPrefix == "" {
 		return errors.New("no bot prefix")
 	}
-	if err != nil {
-		return err
-	}
+	// if err != nil {
+	// 	return err
+	// }
 	return nil
 }
