@@ -5,6 +5,7 @@ import (
 	"github.com/hiteshjain48/animephile-discord-bot/config"
 	"github.com/hiteshjain48/animephile-discord-bot/database"
 	"github.com/hiteshjain48/animephile-discord-bot/logger"
+	"github.com/hiteshjain48/animephile-discord-bot/database/repositories"
 )
 
 func main() {
@@ -34,7 +35,11 @@ func main() {
 	if err != nil {
 		return
 	}
-	bot.Start()
+
+	userRepo := repositories.NewUserRepository(db)
+    animeRepo := repositories.NewAnimeRepository(db)
+
+	bot.Start(userRepo, animeRepo)
 
 	// <- make(chan struct{})
 	// return

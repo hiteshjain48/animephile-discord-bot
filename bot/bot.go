@@ -9,13 +9,13 @@ import (
 	"github.com/hiteshjain48/animephile-discord-bot/config"
 	"github.com/hiteshjain48/animephile-discord-bot/logger"
 	"github.com/hiteshjain48/animephile-discord-bot/anime"
-
+	"github.com/hiteshjain48/animephile-discord-bot/database/models"
 )
 
 var BotID string
 var goBot *discordgo.Session
 
-func Start() {
+func Start(userRepo UserRepository, animeRepo AnimeRepository) {
 	logger.Init()
 	var err error
 	goBot, err = discordgo.New("Bot " + config.Token)
@@ -97,6 +97,12 @@ func messageHandler(session *discordgo.Session, msg *discordgo.MessageCreate) {
 			return
 		}
 		animeList := args[1:]
+		user := models.User{
+			DiscordID: msg.Author.ID,
+			UserName:  msg.Author.Username,
+			JoinedAt:  time.Now(),
+		}
+		if 
 		session.ChannelMessageSend(msg.ChannelID, fmt.Sprintf("Subscribed to %s", strings.Join(animeList, ", ")))
 	case "list":
 		session.ChannelMessageSend(msg.ChannelID, "You are not subscribed to any anime yet.")

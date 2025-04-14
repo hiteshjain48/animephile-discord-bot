@@ -19,13 +19,28 @@ func NewAnimeRepository(db *sql.DB) *AnimeRepository {
 
 func (ar *AnimeRepository) Create(anime models.Anime) error {
 	return ar.repo.Execute(
-		"INSERT INTO anime (id, title) VALUES ($1 $2)", anime.ID, anime.Title,
+		"INSERT INTO anime (id, title) VALUES ($1, $2)", anime.ID, anime.Title,
 	)
 }
 
 func (ar *AnimeRepository) GetByID(id string) (models.Anime, error) {
 	var anime models.Anime
 	row := ar.repo.QueryRow("SELECT id, title FROM anime WHERE id = $1", id)
+
+	err := row.Scan(&anime.ID, &anime.Title)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return anime, errors.New("anime not found")
+		}
+		return anime, err
+	}
+
+	return anime, nil
+}
+
+func (ar *AnimeRepository) GetByTitle(title string) (models.Anime, error) {
+	var anime models.Anime
+	row := ar.repo.QueryRow("SELECT id, title FROM anime WHERE title = $1", title)
 
 	err := row.Scan(&anime.ID, &anime.Title)
 	if err != nil {

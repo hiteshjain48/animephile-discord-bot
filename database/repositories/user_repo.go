@@ -19,7 +19,7 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 
 func (ur *UserRepository) Create(user models.User) error {
 	return ur.repo.Execute(
-		"INSERT INTO users (discord_id, user_name, joined_at) VALUES ($1 $2)", user.DiscordID, user.UserName, user.JoinedAt,
+		"INSERT INTO users (discord_id, user_name, joined_at) VALUES ($1, $2, $3) ON CONFLICT (discord_id) DO NOTHING", user.DiscordID, user.UserName, user.JoinedAt,
 	)
 }
 
@@ -56,3 +56,5 @@ func (ur *UserRepository) List() ([]models.User, error) {
 	)
 	return users, err
 }
+
+
