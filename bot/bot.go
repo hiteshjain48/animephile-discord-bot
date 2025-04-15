@@ -125,11 +125,11 @@ func messageHandler(session *discordgo.Session, msg *discordgo.MessageCreate) {
 				}
 				err = uRepo.Create(user)
 				if err != nil {
-					session.ChannelMessageSend(msg.ChannelID, fmt.Sprintf("Error try again"))
+					session.ChannelMessageSend(msg.ChannelID, "Error creating user try again")
 					break
 				}	 
 			} else {
-				session.ChannelMessageSend(msg.ChannelID, fmt.Sprintf("Error try again"))
+				session.ChannelMessageSend(msg.ChannelID, "Error fetching user try again")
 				break
 			}
 		}
@@ -138,7 +138,7 @@ func messageHandler(session *discordgo.Session, msg *discordgo.MessageCreate) {
 			if _, exists := animePresentLookup[anime]; !exists {
 				err = aRepo.Create(models.Anime{ID: uuid.New(), Title: anime,})
 				if err != nil {
-					session.ChannelMessageSend(msg.ChannelID, fmt.Sprintf("Error try again"))
+					session.ChannelMessageSend(msg.ChannelID, "Error creating anime try again")
 					break
 				}
 			}
