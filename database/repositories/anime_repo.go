@@ -19,7 +19,7 @@ func NewAnimeRepository(db *sql.DB) *AnimeRepository {
 
 func (ar *AnimeRepository) Create(anime models.Anime) error {
 	return ar.repo.Execute(
-		"INSERT INTO anime (id, title) VALUES ($1, $2)", anime.ID, anime.Title,
+		"INSERT INTO anime (title) VALUES ($1)", anime.Title,
 	)
 }
 
