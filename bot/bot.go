@@ -112,6 +112,7 @@ func messageHandler(session *discordgo.Session, msg *discordgo.MessageCreate) {
 		}
 		if err != nil {
 			session.ChannelMessageSend(msg.ChannelID, fmt.Sprintf("Can't subscribe right now."))
+			logger.Log.Error(err.Error())
 			break
 		}
 		var user models.User
@@ -126,6 +127,7 @@ func messageHandler(session *discordgo.Session, msg *discordgo.MessageCreate) {
 				err = uRepo.Create(user)
 				if err != nil {
 					session.ChannelMessageSend(msg.ChannelID, "Error creating user try again")
+					logger.Log.Error(err.Error())
 					break
 				}	 
 			} else {
@@ -140,6 +142,7 @@ func messageHandler(session *discordgo.Session, msg *discordgo.MessageCreate) {
 				err = aRepo.Create(models.Anime{ID: uuid.New(), Title: anime,})
 				if err != nil {
 					session.ChannelMessageSend(msg.ChannelID, "Error creating anime try again")
+					logger.Log.Error(err.Error())
 					break
 				}
 			}
