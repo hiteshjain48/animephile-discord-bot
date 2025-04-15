@@ -6,18 +6,24 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/google/uuid"
 	"github.com/hiteshjain48/animephile-discord-bot/config"
 	"github.com/hiteshjain48/animephile-discord-bot/logger"
 	"github.com/hiteshjain48/animephile-discord-bot/anime"
 	"github.com/hiteshjain48/animephile-discord-bot/database/models"
+	"github.com/hiteshjain48/animephile-discord-bot/database/repositories"
+
 )
 
 var BotID string
 var goBot *discordgo.Session
-
-func Start(userRepo UserRepository, animeRepo AnimeRepository) {
+var uRepo *repositories.UserRepository
+var aRepo *repositories.AnimeRepository
+func Start(userRepo *repositories.UserRepository, animeRepo *repositories.AnimeRepository) {
 	logger.Init()
 	var err error
+	uRepo = userRepo
+	aRepo = animeRepo
 	goBot, err = discordgo.New("Bot " + config.Token)
 	if err != nil {
 		// fmt.Println(err.Error())
@@ -97,13 +103,48 @@ func messageHandler(session *discordgo.Session, msg *discordgo.MessageCreate) {
 			return
 		}
 		animeList := args[1:]
-		user := models.User{
-			DiscordID: msg.Author.ID,
-			UserName:  msg.Author.Username,
-			JoinedAt:  time.Now(),
+		animePresent, err := aRepo.List()
+		animePresentLookup := make(map[string]struct{})
+		for _, anime := range animePresent{
+			if _, exists := animePresentLookup[anime.Title]; !exists {
+				animePresentLookup[anime.Title] = struct{}{}
+			}
 		}
-		if 
+		if err != nil {
+			session.ChannelMessageSend(msg.ChannelID, fmt.Sprintf("Can't subscribe right now."))
+			break
+		}
+		var user models.User
+		user, err = uRepo.GetByID(msg.Author.ID)
+		if err != nil {
+			if err.Error() == "user not found" {
+				user = models.User{
+					DiscordID: msg.Author.ID,
+					UserName:  msg.Author.Username,
+					JoinedAt:  time.Now(),
+				}
+				err = uRepo.Create(user)
+				if err != nil {
+					session.ChannelMessageSend(msg.ChannelID, fmt.Sprintf("Error try again"))
+					break
+				}	 
+			} else {
+				session.ChannelMessageSend(msg.ChannelID, fmt.Sprintf("Error try again"))
+				break
+			}
+		}
+		
+		for _, anime := range animeList {
+			if _, exists := animePresentLookup[anime]; !exists {
+				err = aRepo.Create(models.Anime{ID: uuid.New(), Title: anime,})
+				if err != nil {
+					session.ChannelMessageSend(msg.ChannelID, fmt.Sprintf("Error try again"))
+					break
+				}
+			}
+		}
 		session.ChannelMessageSend(msg.ChannelID, fmt.Sprintf("Subscribed to %s", strings.Join(animeList, ", ")))
+		
 	case "list":
 		session.ChannelMessageSend(msg.ChannelID, "You are not subscribed to any anime yet.")
 	case "help":
