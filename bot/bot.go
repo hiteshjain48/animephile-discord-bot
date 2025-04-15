@@ -129,7 +129,7 @@ func messageHandler(session *discordgo.Session, msg *discordgo.MessageCreate) {
 					break
 				}	 
 			} else {
-				session.ChannelMessageSend(msg.ChannelID, "Error fetching user try again")\
+				session.ChannelMessageSend(msg.ChannelID, "Error fetching user try again")
 				logger.Log.Error(err.Error())
 				break
 			}
