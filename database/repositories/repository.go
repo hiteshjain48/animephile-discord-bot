@@ -19,6 +19,7 @@ func (r *Repository) Execute(query string, args ...interface{}) error {
 	return err
 }
 
+
 func (r *Repository) Query(query string, handler func(*sql.Rows) error, args ...interface{}) error {
 	rows, err := r.DB.Query(query)
 	if err != nil {

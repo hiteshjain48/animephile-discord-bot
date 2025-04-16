@@ -6,24 +6,25 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/google/uuid"
-	"github.com/hiteshjain48/animephile-discord-bot/config"
-	"github.com/hiteshjain48/animephile-discord-bot/logger"
 	"github.com/hiteshjain48/animephile-discord-bot/anime"
+	"github.com/hiteshjain48/animephile-discord-bot/config"
 	"github.com/hiteshjain48/animephile-discord-bot/database/models"
 	"github.com/hiteshjain48/animephile-discord-bot/database/repositories"
-
+	"github.com/hiteshjain48/animephile-discord-bot/logger"
 )
 
 var BotID string
 var goBot *discordgo.Session
 var uRepo *repositories.UserRepository
 var aRepo *repositories.AnimeRepository
-func Start(userRepo *repositories.UserRepository, animeRepo *repositories.AnimeRepository) {
+var sRepo *repositories.SubscriptionRepository
+
+func Start(userRepo *repositories.UserRepository, animeRepo *repositories.AnimeRepository, subscriptionRepo *repositories.SubscriptionRepository) {
 	logger.Init()
 	var err error
 	uRepo = userRepo
 	aRepo = animeRepo
+	sRepo = subscriptionRepo
 	goBot, err = discordgo.New("Bot " + config.Token)
 	if err != nil {
 		// fmt.Println(err.Error())
@@ -105,18 +106,18 @@ func messageHandler(session *discordgo.Session, msg *discordgo.MessageCreate) {
 		animeList := args[1:]
 		animePresent, err := aRepo.List()
 		animePresentLookup := make(map[string]struct{})
-		for _, anime := range animePresent{
+		for _, anime := range animePresent {
 			if _, exists := animePresentLookup[anime.Title]; !exists {
 				animePresentLookup[anime.Title] = struct{}{}
 			}
 		}
 		if err != nil {
-			session.ChannelMessageSend(msg.ChannelID, fmt.Sprintf("Can't subscribe right now."))
+			session.ChannelMessageSend(msg.ChannelID, "Can't subscribe right now.")
 			logger.Log.Error(err.Error())
 			break
 		}
 		var user models.User
-		user, err = uRepo.GetByID(msg.Author.ID)
+		_, err = uRepo.GetByID(msg.Author.ID)
 		if err != nil {
 			if err.Error() == "user not found" {
 				user = models.User{
@@ -129,26 +130,44 @@ func messageHandler(session *discordgo.Session, msg *discordgo.MessageCreate) {
 					session.ChannelMessageSend(msg.ChannelID, "Error creating user try again")
 					logger.Log.Error(err.Error())
 					break
-				}	 
+				}
 			} else {
 				session.ChannelMessageSend(msg.ChannelID, "Error fetching user try again")
 				logger.Log.Error(err.Error())
 				break
 			}
 		}
-		
+
 		for _, anime := range animeList {
 			if _, exists := animePresentLookup[anime]; !exists {
-				err = aRepo.Create(models.Anime{ID: uuid.New(), Title: anime,})
+				id, err := aRepo.Create(anime)
 				if err != nil {
 					session.ChannelMessageSend(msg.ChannelID, "Error creating anime try again")
+					logger.Log.Error(err.Error())
+					break
+				}
+				err = sRepo.Create(models.Subscription{DiscordID: msg.Author.ID, AnimeID: id})
+				if err != nil {
+					session.ChannelMessageSend(msg.ChannelID, "Error subscribing")
+					logger.Log.Error(err.Error())
+					break
+				}
+			} else {
+				anime, err := aRepo.GetByTitle(anime)
+				if err != nil {
+					session.ChannelMessageSend(msg.ChannelID, "Error subscribing")
+					logger.Log.Error((err.Error()))
+				}
+				err = sRepo.Create(models.Subscription{DiscordID: msg.Author.ID, AnimeID: anime.ID})
+				if err != nil {
+					session.ChannelMessageSend(msg.ChannelID, "Error subscribing")
 					logger.Log.Error(err.Error())
 					break
 				}
 			}
 		}
 		session.ChannelMessageSend(msg.ChannelID, fmt.Sprintf("Subscribed to %s", strings.Join(animeList, ", ")))
-		
+
 	case "list":
 		session.ChannelMessageSend(msg.ChannelID, "You are not subscribed to any anime yet.")
 	case "help":
@@ -160,16 +179,5 @@ func messageHandler(session *discordgo.Session, msg *discordgo.MessageCreate) {
 	default:
 		session.ChannelMessageSend(msg.ChannelID, "Unknown Command")
 	}
-	// messageSplit := strings.Split(message, " ")
-	// fmt.Println(message)
-	// fmt.Println(string(messageSplit[0]))
-	// var anime []string
-	// if messageSplit[1] == "subscribe" {
-	// 	for i := 2; i < len(messageSplit); i++ {
-	// 		anime = append(anime, messageSplit[i])
-	// 	}
-	// 	_, _ = session.ChannelMessageSend(msg.ChannelID, fmt.Sprintf("subscribed to %v", anime))
-	// }
-	// fmt.Println(anime)
-	// fmt.Println(len(anime))
+
 }

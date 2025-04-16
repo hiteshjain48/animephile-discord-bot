@@ -1,14 +1,7 @@
 package models
 
-import(
-	"time"
 
-	"github.com/google/uuid"
-)
-
-type Subscription struct {
-	ID           uuid.UUID       
+type Subscription struct {      
 	DiscordID    string    
-	AnimeID      int       
-	SubscribedAt time.Time 
+	AnimeID      int 
 }

@@ -38,8 +38,8 @@ func main() {
 
 	userRepo := repositories.NewUserRepository(db)
     animeRepo := repositories.NewAnimeRepository(db)
-
-	bot.Start(userRepo, animeRepo)
+	subscriptionRepo := repositories.NewSubscriptionRepository(db)
+	bot.Start(userRepo, animeRepo, subscriptionRepo)
 
 	// <- make(chan struct{})
 	// return

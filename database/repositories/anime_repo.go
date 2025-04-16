@@ -17,10 +17,12 @@ func NewAnimeRepository(db *sql.DB) *AnimeRepository {
 	}
 }
 
-func (ar *AnimeRepository) Create(anime models.Anime) error {
-	return ar.repo.Execute(
-		"INSERT INTO anime (title) VALUES ($1)", anime.Title,
-	)
+func (ar *AnimeRepository) Create(title string) (int, error) {
+	var id int
+	err :=  ar.repo.QueryRow(
+		"INSERT INTO anime (title) VALUES ($1) RETURNING id", title,
+	).Scan(&id)
+	return id, err
 }
 
 func (ar *AnimeRepository) GetByID(id string) (models.Anime, error) {
