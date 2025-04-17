@@ -11,6 +11,7 @@ import (
 	"github.com/hiteshjain48/animephile-discord-bot/database/models"
 	"github.com/hiteshjain48/animephile-discord-bot/database/repositories"
 	"github.com/hiteshjain48/animephile-discord-bot/logger"
+	"github.com/hiteshjain48/animephile-discord-bot/scheduler"
 )
 
 var BotID string
@@ -27,7 +28,6 @@ func Start(userRepo *repositories.UserRepository, animeRepo *repositories.AnimeR
 	sRepo = subscriptionRepo
 	goBot, err = discordgo.New("Bot " + config.Token)
 	if err != nil {
-		// fmt.Println(err.Error())
 		logger.Log.Error(err.Error())
 		return
 	}
@@ -36,7 +36,6 @@ func Start(userRepo *repositories.UserRepository, animeRepo *repositories.AnimeR
 	// fmt.Println(user)
 	logger.Log.Info(fmt.Sprintf("User: %s", user))
 	if err != nil {
-		// fmt.Println(err.Error())
 		logger.Log.Error(err.Error())
 		return
 	}
@@ -47,10 +46,14 @@ func Start(userRepo *repositories.UserRepository, animeRepo *repositories.AnimeR
 
 	err = goBot.Open()
 	if err != nil {
-		// fmt.Println(err.Error())
 		logger.Log.Error(err.Error())
 		return
 	}
+
+	scheduler := scheduler.NewScheduler(aRepo, sRepo, goBot)
+	scheduler.Start()
+	defer scheduler.Stop()
+	
 	schedules, err := anime.GetSchedule()
 	if err != nil {
 		logger.Log.Error(err)
@@ -61,7 +64,6 @@ func Start(userRepo *repositories.UserRepository, animeRepo *repositories.AnimeR
 			s.Episode,
 			time.Unix(s.AiringAt, 0).Format("15:04 MST"))
 	}
-	// fmt.Println("Bot is running!")
 	logger.Log.Info("Bot is running!")
 }
 
@@ -70,8 +72,6 @@ func messageHandler(session *discordgo.Session, msg *discordgo.MessageCreate) {
 	if msg.Author.ID == BotID {
 		return
 	}
-	// fmt.Println(msg.Author.ID)
-	// fmt.Println(msg.Content)
 	logger.Log.Info(fmt.Sprintf("Author: %s", msg.Author))
 	logger.Log.Info(fmt.Sprintf("Message received: %s", msg.Content))
 	if !strings.HasPrefix(msg.Content, config.BotPrefix) {
@@ -169,7 +169,22 @@ func messageHandler(session *discordgo.Session, msg *discordgo.MessageCreate) {
 		session.ChannelMessageSend(msg.ChannelID, fmt.Sprintf("Subscribed to %s", strings.Join(animeList, ", ")))
 
 	case "list":
-		session.ChannelMessageSend(msg.ChannelID, "You are not subscribed to any anime yet.")
+		animes, err := aRepo.ListByUser(msg.Author.ID)
+		if err != nil {
+			session.ChannelMessageSend(msg.ChannelID, "Error while listing")
+			logger.Log.Error(err.Error())
+			break
+		}
+		if len(animes) == 0 {
+			session.ChannelMessageSend(msg.ChannelID, "You are not subscribed to any anime yet.")
+			break
+		}
+		var titles []string
+		for _, anime := range(animes) {
+			titles = append(titles, anime.Title)
+		}
+		session.ChannelMessageSend(msg.ChannelID, fmt.Sprintf("You are  subscribed to %s", strings.Join(titles, ", ")))
+
 	case "help":
 		helpMessage := "Available commands:\n" +
 			"!subscribe [anime name] - Subscribe to anime updates\n" +

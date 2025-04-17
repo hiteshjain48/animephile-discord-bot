@@ -59,3 +59,4 @@ func (sr *SubscriptionRepository) List() ([]models.Subscription, error) {
 	)
 	return subscriptions, err
 }
+

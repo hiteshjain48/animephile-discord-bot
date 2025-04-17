@@ -21,7 +21,7 @@ func (r *Repository) Execute(query string, args ...interface{}) error {
 
 
 func (r *Repository) Query(query string, handler func(*sql.Rows) error, args ...interface{}) error {
-	rows, err := r.DB.Query(query)
+	rows, err := r.DB.Query(query, args...)
 	if err != nil {
 		return err
 	}

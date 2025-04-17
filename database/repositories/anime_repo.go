@@ -25,7 +25,7 @@ func (ar *AnimeRepository) Create(title string) (int, error) {
 	return id, err
 }
 
-func (ar *AnimeRepository) GetByID(id string) (models.Anime, error) {
+func (ar *AnimeRepository) GetByID(id int) (models.Anime, error) {
 	var anime models.Anime
 	row := ar.repo.QueryRow("SELECT id, title FROM anime WHERE id = $1", id)
 
@@ -70,6 +70,26 @@ func (ar *AnimeRepository) List() ([]models.Anime, error) {
 			}
 			return rows.Err()
 		},
+	)
+	return animes, err
+}
+
+func (ar *AnimeRepository) ListByUser(userId string) ([]models.Anime, error) {
+	var animes []models.Anime
+
+	err := ar.repo.Query(
+		"SELECT id, title from anime WHERE id in (SELECT anime_id FROM subscriptions WHERE discord_id = $1)",
+		func(rows *sql.Rows) error {
+			for rows.Next() {
+				var anime models.Anime
+				if err := rows.Scan(&anime.ID, &anime.Title); err != nil {
+					return err
+				}
+				animes = append(animes, anime)
+			}
+			return rows.Err()
+		},
+		userId,
 	)
 	return animes, err
 }
