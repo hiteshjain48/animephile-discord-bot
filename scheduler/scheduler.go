@@ -8,14 +8,14 @@ import (
 	"github.com/hiteshjain48/animephile-discord-bot/anime"
 	"github.com/hiteshjain48/animephile-discord-bot/database/repositories"
 	"github.com/hiteshjain48/animephile-discord-bot/logger"
-	"github.com/robfig/cron"
+	"github.com/robfig/cron/v3"
 )
 
 type Scheduler struct {
-	cron 			*cron.Cron
-	animeRepo		*repositories.AnimeRepository
-	subRepo			*repositories.SubscriptionRepository
-	discordClient	*discordgo.Session
+	cron          *cron.Cron
+	animeRepo     *repositories.AnimeRepository
+	subRepo       *repositories.SubscriptionRepository
+	discordClient *discordgo.Session
 }
 
 func NewScheduler(
@@ -23,21 +23,20 @@ func NewScheduler(
 	subRepo *repositories.SubscriptionRepository,
 	discord *discordgo.Session,
 ) *Scheduler {
-	c := cron.New()
+	c := cron.New(cron.WithSeconds())
 
 	return &Scheduler{
-		cron: c,
+		cron:          c,
 		animeRepo:     animeRepo,
 		subRepo:       subRepo,
 		discordClient: discord,
 	}
 }
 
-
 func (s *Scheduler) Start() {
-	err := s.cron.AddFunc("0 0 * * * *", s.checkNewEpisodes)
+	_, err := s.cron.AddFunc("0 * * * *", s.checkNewEpisodes)
 	if err != nil {
-		logger.Log.Error(fmt.Sprintf("Error starting scheduler: %v",err.Error()))
+		logger.Log.Error(fmt.Sprintf("Error starting scheduler: %v", err.Error()))
 		return
 	}
 
@@ -50,7 +49,7 @@ func (s *Scheduler) Stop() {
 }
 
 func (s *Scheduler) checkNewEpisodes() {
-	logger.Log.Info("Checking for new episoders...")
+	logger.Log.Info("Checking for new episodes...")
 
 	schedule, err := anime.GetSchedule()
 	if err != nil {
@@ -63,19 +62,19 @@ func (s *Scheduler) checkNewEpisodes() {
 	}
 
 	animeMap := make(map[int][]string)
-	for _, sub := range(subscriptions) {
+	for _, sub := range subscriptions {
 		animeMap[sub.AnimeID] = append(animeMap[sub.AnimeID], sub.DiscordID)
 	}
 
-	for animeID, subscribers := range(animeMap) {
+	for animeID, subscribers := range animeMap {
 		anime, err := s.animeRepo.GetByID(animeID)
 		if err != nil {
 			logger.Log.Error(fmt.Sprintf("Error: %v", err.Error()))
 			continue
 		}
-		for _, airedAnime := range(schedule) {
+		for _, airedAnime := range schedule {
 			if anime.Title == airedAnime.Media.Title.Romaji {
-				for _, discordID := range(subscribers) {
+				for _, discordID := range subscribers {
 					s.notifyUser(discordID, airedAnime)
 				}
 			}
@@ -94,9 +93,9 @@ func (s *Scheduler) notifyUser(discordID string, airedAnime anime.AiringSchedule
 	}
 
 	msg := fmt.Sprintf("📺 %s - Ep %d at %s\n",
-	airedAnime.Media.Title.Romaji,
-	airedAnime.Episode,
-	time.Unix(airedAnime.AiringAt, 0).Format("15:04 MST"))
+		airedAnime.Media.Title.Romaji,
+		airedAnime.Episode,
+		time.Unix(airedAnime.AiringAt, 0).Format("15:04 MST"))
 
 	_, err = s.discordClient.ChannelMessageSend(channel.ID, msg)
 	if err != nil {
