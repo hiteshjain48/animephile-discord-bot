@@ -34,7 +34,7 @@ func NewScheduler(
 }
 
 func (s *Scheduler) Start() {
-	_, err := s.cron.AddFunc("0 * * * *", s.checkNewEpisodes)
+	_, err := s.cron.AddFunc("0 0 * * * *", s.checkNewEpisodes)
 	if err != nil {
 		logger.Log.Error(fmt.Sprintf("Error starting scheduler: %v", err.Error()))
 		return
