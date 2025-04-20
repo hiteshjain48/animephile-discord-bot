@@ -76,6 +76,8 @@ func messageHandler(session *discordgo.Session, msg *discordgo.MessageCreate) {
 		return
 	}
 	logger.Log.Info(fmt.Sprintf("Author: %s", msg.Author))
+	logger.Log.Info(fmt.Sprintf("Channel id: %s", msg.ChannelID))
+	logger.Log.Info(fmt.Sprintf("Guild Id: %s", msg.GuildID))
 	logger.Log.Info(fmt.Sprintf("Message received: %s", msg.Content))
 	if !strings.HasPrefix(msg.Content, config.BotPrefix) {
 		return
@@ -106,13 +108,13 @@ func messageHandler(session *discordgo.Session, msg *discordgo.MessageCreate) {
 	} else {
 		message = strings.TrimPrefix(msg.Content, config.BotPrefix)
 	}
-
+	logger.Log.Info(fmt.Sprintf("Command message: %s", message))
 	args := strings.Fields(message)
 	if len(args) == 0 {
 		return
 	}
 	command := args[0]
-
+	logger.Log.Info(fmt.Sprintf("Command received: %s",command))
 	switch command {
 	case "subscribe":
 		if len(args) < 2 {
