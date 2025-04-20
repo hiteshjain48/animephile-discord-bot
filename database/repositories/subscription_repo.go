@@ -26,7 +26,7 @@ func (sr *SubscriptionRepository) Create(subscription models.Subscription) error
 
 func (sr *SubscriptionRepository) GetByID(id string) (models.Subscription, error) {
 	var subscription models.Subscription
-	row := sr.repo.QueryRow("SELECT discord_id, anime_id FROM anime WHERE id = $1", id)
+	row := sr.repo.QueryRow("SELECT discord_id, anime_id FROM subscriptions WHERE id = $1", id)
 
 	err := row.Scan(&subscription.DiscordID, &subscription.AnimeID)
 	if err != nil {
@@ -45,7 +45,7 @@ func (sr *SubscriptionRepository) List() ([]models.Subscription, error) {
 	var subscriptions []models.Subscription
 
 	err := sr.repo.Query(
-		"SELECT discord_id, anime_id from subscription",
+		"SELECT discord_id, anime_id from subscriptions",
 		func(rows *sql.Rows) error {
 			for rows.Next() {
 				var subscription models.Subscription
