@@ -92,12 +92,25 @@ func messageHandler(session *discordgo.Session, msg *discordgo.MessageCreate) {
 	// args := strings.Fields(message)
 
 	//if direcct msg to bot then this
-	message := strings.TrimPrefix(msg.Content, config.BotPrefix)
+	// message := strings.TrimPrefix(msg.Content, config.BotPrefix)
+	// args := strings.Fields(message)
+	// if len(args) == 0 {
+	// 	return
+	// }
+
+	//consolidated message parsing
+	var message string
+	if string(msg.Content[0]) != config.BotPrefix {
+		messageSplit := strings.Split(msg.Content, " ")[1:]
+		message = strings.TrimPrefix(strings.Join(messageSplit, " "), config.BotPrefix)
+	} else {
+		message = strings.TrimPrefix(msg.Content, config.BotPrefix)
+	}
+
 	args := strings.Fields(message)
 	if len(args) == 0 {
 		return
 	}
-
 	command := args[0]
 
 	switch command {
