@@ -6,6 +6,8 @@ import (
 	"github.com/hiteshjain48/animephile-discord-bot/database"
 	"github.com/hiteshjain48/animephile-discord-bot/logger"
 	"github.com/hiteshjain48/animephile-discord-bot/database/repositories"
+	"github.com/hiteshjain48/animephile-discord-bot/scheduler"
+
 )
 
 func main() {
@@ -33,13 +35,21 @@ func main() {
 	}
 	err = database.RunMigrations(db, "./database/migrations")
 	if err != nil {
+		logger.Log.Error(err)
 		return
 	}
 
 	userRepo := repositories.NewUserRepository(db)
     animeRepo := repositories.NewAnimeRepository(db)
 	subscriptionRepo := repositories.NewSubscriptionRepository(db)
-	bot.Start(userRepo, animeRepo, subscriptionRepo)
+	goBot, err := bot.Start(userRepo, animeRepo, subscriptionRepo)
+	if err != nil {
+		logger.Log.Error(err)
+		return
+	}
+	scheduler := scheduler.NewScheduler(animeRepo, subscriptionRepo, goBot)
+	scheduler.Start()
+	defer scheduler.Stop()
 
 	// <- make(chan struct{})
 	// return

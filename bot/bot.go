@@ -11,7 +11,7 @@ import (
 	"github.com/hiteshjain48/animephile-discord-bot/database/models"
 	"github.com/hiteshjain48/animephile-discord-bot/database/repositories"
 	"github.com/hiteshjain48/animephile-discord-bot/logger"
-	"github.com/hiteshjain48/animephile-discord-bot/scheduler"
+	// "github.com/hiteshjain48/animephile-discord-bot/scheduler"
 )
 
 var BotID string
@@ -20,7 +20,7 @@ var uRepo *repositories.UserRepository
 var aRepo *repositories.AnimeRepository
 var sRepo *repositories.SubscriptionRepository
 
-func Start(userRepo *repositories.UserRepository, animeRepo *repositories.AnimeRepository, subscriptionRepo *repositories.SubscriptionRepository) {
+func Start(userRepo *repositories.UserRepository, animeRepo *repositories.AnimeRepository, subscriptionRepo *repositories.SubscriptionRepository) (*discordgo.Session, error) {
 	logger.Init()
 	var err error
 	uRepo = userRepo
@@ -29,7 +29,7 @@ func Start(userRepo *repositories.UserRepository, animeRepo *repositories.AnimeR
 	goBot, err = discordgo.New("Bot " + config.Token)
 	if err != nil {
 		logger.Log.Error(err.Error())
-		return
+		return nil, err
 	}
 
 	user, err := goBot.User("@me")
@@ -37,7 +37,7 @@ func Start(userRepo *repositories.UserRepository, animeRepo *repositories.AnimeR
 	logger.Log.Info(fmt.Sprintf("User: %s", user))
 	if err != nil {
 		logger.Log.Error(err.Error())
-		return
+		return nil, err
 	}
 
 	BotID = user.ID
@@ -47,16 +47,17 @@ func Start(userRepo *repositories.UserRepository, animeRepo *repositories.AnimeR
 	err = goBot.Open()
 	if err != nil {
 		logger.Log.Error(err.Error())
-		return
+		return nil, err
 	}
 
-	scheduler := scheduler.NewScheduler(aRepo, sRepo, goBot)
-	scheduler.Start()
-	defer scheduler.Stop()
+	// scheduler := scheduler.NewScheduler(aRepo, sRepo, goBot)
+	// scheduler.Start()
+	// defer scheduler.Stop()
 	
 	schedules, err := anime.GetSchedule()
 	if err != nil {
 		logger.Log.Error(err)
+		return nil, err
 	}
 	for _, s := range schedules {
 		fmt.Printf("📺 %s - Ep %d at %s\n",
@@ -65,6 +66,8 @@ func Start(userRepo *repositories.UserRepository, animeRepo *repositories.AnimeR
 			time.Unix(s.AiringAt, 0).Format("15:04 MST"))
 	}
 	logger.Log.Info("Bot is running!")
+	
+	return goBot, nil
 }
 
 func messageHandler(session *discordgo.Session, msg *discordgo.MessageCreate) {
