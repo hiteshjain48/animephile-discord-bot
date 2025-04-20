@@ -79,9 +79,9 @@ func messageHandler(session *discordgo.Session, msg *discordgo.MessageCreate) {
 	logger.Log.Info(fmt.Sprintf("Channel id: %s", msg.ChannelID))
 	logger.Log.Info(fmt.Sprintf("Guild Id: %s", msg.GuildID))
 	logger.Log.Info(fmt.Sprintf("Message received: %s", msg.Content))
-	if !strings.HasPrefix(msg.Content, config.BotPrefix) {
-		return
-	}
+	// if !strings.HasPrefix(msg.Content, config.BotPrefix) {
+	// 	return
+	// }
 
 	// message := string(msg.Content)
 
