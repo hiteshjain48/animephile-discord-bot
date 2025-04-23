@@ -112,7 +112,7 @@ func messageHandler(session *discordgo.Session, msg *discordgo.MessageCreate) {
 	// command := args[0]
 	command, message, present := strings.Cut(message, " ")
 	if !present {
-		if command != "list" || command != "help" {
+		if command != "list" && command != "help" {
 			session.ChannelMessageSend(msg.ChannelID, "Please provide a command")
 			logger.Log.Error("Command not found")
 			return	
