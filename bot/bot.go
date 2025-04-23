@@ -49,10 +49,6 @@ func Start(userRepo *repositories.UserRepository, animeRepo *repositories.AnimeR
 		logger.Log.Error(err.Error())
 		return nil, err
 	}
-
-	// scheduler := scheduler.NewScheduler(aRepo, sRepo, goBot)
-	// scheduler.Start()
-	// defer scheduler.Stop()
 	
 	schedules, err := anime.GetSchedule()
 	if err != nil {
@@ -109,19 +105,29 @@ func messageHandler(session *discordgo.Session, msg *discordgo.MessageCreate) {
 		message = strings.TrimPrefix(msg.Content, config.BotPrefix)
 	}
 	logger.Log.Info(fmt.Sprintf("Command message: %s", message))
-	args := strings.Fields(message)
-	if len(args) == 0 {
+	// args := strings.Fields(message)
+	// if len(args) == 0 {
+	// 	return
+	// }
+	// command := args[0]
+	command, message, present := strings.Cut(message, " ")
+	if !present {
+		logger.Log.Error("Command not found")
 		return
 	}
-	command := args[0]
+	preArgs := strings.Split(message, ",")
+	var args = make([]string, len(preArgs))
+	for i, arg := range preArgs {
+		args[i] = strings.TrimSpace(arg)
+	}
 	logger.Log.Info(fmt.Sprintf("Command received: %s",command))
 	switch command {
 	case "subscribe":
-		if len(args) < 2 {
+		if len(args) < 1 {
 			session.ChannelMessageSend(msg.ChannelID, "Please specify anime to subscribe to.")
 			return
 		}
-		animeList := args[1:]
+		animeList := args[:]
 		animePresent, err := aRepo.List()
 		animePresentLookup := make(map[string]struct{})
 		for _, anime := range animePresent {
