@@ -127,7 +127,7 @@ func messageHandler(session *discordgo.Session, msg *discordgo.MessageCreate) {
 			session.ChannelMessageSend(msg.ChannelID, "Please specify anime to subscribe to.")
 			return
 		}
-		animeList := args[:]
+		animeList := args
 		animePresent, err := aRepo.List()
 		animePresentLookup := make(map[string]struct{})
 		for _, anime := range animePresent {
